@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<script>
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const stage = new Konva.Stage({
+        container: 'container',
+        width,
+        height,
+    });
+
+    const redArgs = {
+        x: 400,
+        y: 400,
+        fill: 'red',
+        width: 200,
+        height: 200,
+    };
+
+    const text = new Konva.Text({
+        x: redArgs.x,
+        y: redArgs.y + redArgs.width + 10,
+        text: '0',
+        fontSize: 30,
+        fontFamily: 'Calibri',
+        fill: 'black',
+    });
+
+    const countRedPixels = () => {
+        const canvas = document.querySelector('#container canvas');
+        const context = canvas.getContext('2d');
+
+        const imageData = context.getImageData(redArgs.x * devicePixelRatio, redArgs.y * devicePixelRatio, redArgs.width * devicePixelRatio, redArgs.height * devicePixelRatio);
+
+        let count = 0;
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            if (imageData.data[i]) {
+                count += 1;
+            }
+        }
+        text.setAttrs({
+            text: count
+        });
+    }
+
+    const addEvents = (box) => {
+        // add cursor styling
+        box.on('mouseover', function () {
+            document.body.style.cursor = 'grab';
+        });
+        box.on('dragstart', function () {
+            document.body.style.cursor = 'grabbing';
+        });
+        box.on('dragend', function () {
+            document.body.style.cursor = 'grab';
+            countRedPixels();
+        });
+        box.on('mouseout', function () {
+            document.body.style.cursor = 'default';
+        });
+    }
+    const createRect = (args, layer) => {
+        const box = new Konva.Rect({
+            ...args,
+            fill: 'blue',
+            width: 50,
+            height: 50,
+            draggable: true
+        });
+        addEvents(box);
+
+        layer.add(box);
+    }
+    const createCircle = (args, layer) => {
+        const box = new Konva.Circle({
+            ...args,
+            fill: 'blue',
+            width: 50,
+            height: 50,
+            draggable: true
+        });
+        addEvents(box);
+
+        layer.add(box);
+    }
+    const createStar = (args, layer) => {
+        const box = new Konva.Star({
+            ...args,
+            fill: 'blue',
+            numPoints: 5,
+            innerRadius: 20,
+            outerRadius: 40,
+            draggable: true
+        });
+        addEvents(box);
+
+        layer.add(box);
+    }
+
+    const layer = new Konva.Layer();
+    const red = new Konva.Rect(redArgs);
+    layer.add(red);
+
+    createRect({
+        x: 20,
+        y: 20,
+    }, layer);
+    createRect({
+        x: 100,
+        y: 20,
+    }, layer);
+    createCircle({
+        x: 40,
+        y: 100,
+    }, layer);
+    createCircle({
+        x: 40,
+        y: 150,
+    }, layer);
+    createStar({
+        x: 120,
+        y: 120
+    }, layer);
+    createStar({
+        x: 120,
+        y: 180
+    }, layer);
+
+    layer.add(text);
+
+    stage.add(layer);
+
+    countRedPixels();
+</script>
+</body>
+</html>
